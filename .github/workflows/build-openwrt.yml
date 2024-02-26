@@ -34,6 +34,7 @@ env:
   UPLOAD_TRS: true
   UPLOAD_fic: true
   UPLOAD_muse: true
+  UPLOAD_anon: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -187,6 +188,15 @@ jobs:
         echo "::warning file=musetransfer.com::$(cat muse.log | grep https)"
         echo "url=$(cat muse.log | grep https | cut -f3 -d" ")"  >> $GITHUB_OUTPUT
 
+    - name: Upload firmware to anon
+      id: anon
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_anon == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer anon --no-progress upload_files 2>&1 | tee anon.log
+        echo "::warning file=anonfile.com::$(cat anon.log | grep https)"
+        echo "url=$(cat anon.log | grep https | cut -f3 -d" ")"  >> $GITHUB_OUTPUT
+        
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
@@ -209,8 +219,8 @@ jobs:
       shell: bash
       run: |
         r='<div>🎉🎉🎉🎉🎉🎉🎉🎉</div>'
-        if [ ${{env.UPLOAD_COWTRANSFER}} == 'true' ];then
-           r=$r'<p> 🌈 Cowtransfer ⭐ <a target="_blank" href="${{ steps.cowtransfer.outputs.url }}" ><span class="px-1 text-bold">🔗</span></a> </p>'
+        if [ ${{env.UPLOAD_fic}} == 'true' ];then
+           r=$r'<p> 🌈 1Fichier ⭐ <a target="_blank" href="${{ steps.fic.outputs.url }}" ><span class="px-1 text-bold">🔗</span></a> </p>'
         fi
         if [ ${{env.UPLOAD_WETRANSFER}} == 'true' ];then
           r=$r'<p> 🌈 WeTransfer ⭐ <a target="_blank" href="${{ steps.wetransfer.outputs.url }}"><span class="px-1 text-bold">🔗</span></a></p>'
@@ -220,6 +230,12 @@ jobs:
         fi
         if [ ${{env.UPLOAD_TRS}} == 'true' ];then
           r=$r'<p> 🌈 Transfer ⭐ <a target="_blank" href="${{ steps.trs.outputs.url }}"><span class="px-1 text-bold">🔗</span></a></p>'
+        fi
+        if [ ${{env.UPLOAD_muse}} == 'true' ];then
+          r=$r'<p> 🌈 Musetransfer ⭐ <a target="_blank" href="${{ steps.muse.outputs.url }}"><span class="px-1 text-bold">🔗</span></a></p>'
+        fi
+        if [ ${{env.UPLOAD_anon}} == 'true' ];then
+          r=$r'<p> 🌈 Anonfile ⭐ <a target="_blank" href="${{ steps.anon.outputs.url }}"><span class="px-1 text-bold">🔗</span></a></p>'
         fi
         echo "RELEASE_BODY=$r" >> $GITHUB_OUTPUT
     
