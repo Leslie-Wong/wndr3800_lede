@@ -37,6 +37,12 @@ env:
   UPLOAD_anon: true
   TZ: Asia/Shanghai
 
+permissions:
+  checks: write
+  contents: write
+  pages: write
+  id-token: write
+  
 jobs:
   build:
     runs-on: ubuntu-20.04
